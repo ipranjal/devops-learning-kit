@@ -1,0 +1,29 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Advance Deploy 
+
+# Controls when the action will run. 
+on: workflow_dispatch
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  CLUSTER_NAME: dev
+  
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:    
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure EKS
+        run: |
+          aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+          aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+          aws configure set default.region eu-central-1
+          aws eks update-kubeconfig --name dev --region eu-central-1
+          kubectl apply -f k8s/
+          sleep 5s
+          kubectl scale deployment sample-api --replicas=0
+          sleep 5s
+          kubectl scale deployment sample-api --replicas=1
