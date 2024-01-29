@@ -1,0 +1,12 @@
+FROM tiangolo/uvicorn-gunicorn:python3.8
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
+COPY . .
+COPY .env .
+
+# COPY prestart.sh .
+# RUN chmod 777 -R prestart.sh
+# ENTRYPOINT ["/app/prestart.sh"]
+# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
