@@ -1,0 +1,36 @@
+# This is a basic workflow to help you get started with Actions
+
+name: terraform_plan
+
+# Controls when the action will run. 
+on: [pull_request, workflow_dispatch]
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup environment and Terraform Plan
+        env: # Or as an environment variable
+          AWS_ACCESS_KEY_ID: ${{ secrets.VITAL_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.VITAL_AWS_SECRET_ACCESS_KEY }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install wget unzip
+          sudo apt install software-properties-common
+          terraform -version
+          TF_PATH=$(which terraform)
+          echo $TF_PATH
+          sudo rm -f $TF_PATH
+          terraform -version || echo "No TF Version"
+          sudo wget https://releases.hashicorp.com/terraform/0.12.6/terraform_0.12.6_linux_amd64.zip
+          unzip terraform*.zip
+          sudo mv terraform /usr/local/bin
+          terraform -version
+          terraform init
+          terraform -version
+          terraform workspace select development || terraform workspace new development
+          terraform -version
+          terraform plan -out=ec2.tfplan
